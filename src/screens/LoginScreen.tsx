@@ -14,7 +14,7 @@ export const Login = () => {
         size={GoogleSigninButton.Size.Wide}
         color={GoogleSigninButton.Color.Dark}
         onPress={login}
-        disabled={false} // You can tie this to a loading state later!
+        disabled={false} 
       />
 
     </SafeAreaView>

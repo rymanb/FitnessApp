@@ -1,14 +1,33 @@
-import {View, Text, ScrollView} from 'react-native';
+import {View, Text, ScrollView, Pressable} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GreetUser } from '@/components/GreetUser';
 import { AccountButton } from '@/components/AccountButton';
+import { useState } from 'react';
+import PlanPanel from '@/components/PlanPanel';
 
 export const Dashboard = () => {
+    const [isCreatingPlan, setIsCreatingPlan] = useState(false);
+
   return (
     <SafeAreaView className={styles.mainContainer}>
         <View className={styles.userContainer}>
                 <AccountButton onPress={() => {}}/>
                 <GreetUser />
+        </View>
+
+        <View>
+            <Pressable onPress={() => setIsCreatingPlan(true)}>
+                <Text className={styles.headerText}>Create Plan</Text>
+            </Pressable>
+
+            {isCreatingPlan && (
+                <PlanPanel
+                    isVisible={isCreatingPlan}
+                    onClose={() => setIsCreatingPlan(false)}
+                />
+            )}
+
+            
         </View>
 
     </SafeAreaView>

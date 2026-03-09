@@ -13,7 +13,6 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
     const [user, setUser] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // check if already logged in
     useEffect(() => {
         checkUser();
     }, []);
