@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Pressable, TextInput, ScrollView, Alert } from "react-native";
-import AnimatedModal from "./AnimatedModal";
+import AnimatedModal from "./ui/AnimatedModal";
 import ExersizePanel from "./ExercisePanel";
 import { PlannedExercise, WgerExercise } from "@/types";
 import ExerciseCard from "./ExerciseCard";

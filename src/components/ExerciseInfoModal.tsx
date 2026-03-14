@@ -1,5 +1,5 @@
 import { View, ScrollView, Pressable } from "react-native";
-import AnimatedModal from "./AnimatedModal";
+import AnimatedModal from "./ui/AnimatedModal";
 import { WgerExercise } from "@/types";
 import { Feather } from "@expo/vector-icons";
 import { useVideoPlayer, VideoView } from 'expo-video';

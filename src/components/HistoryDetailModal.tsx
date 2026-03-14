@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import AnimatedModal from './AnimatedModal';
+import AnimatedModal from './ui/AnimatedModal';
 import { CompletedWorkout } from '@/types';
 import { Text } from '@/components/ui/Typography';
 

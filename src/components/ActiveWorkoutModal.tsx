@@ -3,7 +3,7 @@ import { View, Pressable, ScrollView, Keyboard } from "react-native";
 import { Feather } from '@expo/vector-icons';
 import ExerciseCard from "./ExerciseCard"; 
 import ExersizePanel from "./ExercisePanel";
-import AnimatedModal from "./AnimatedModal";
+import AnimatedModal from "./ui/AnimatedModal";
 import { useWorkoutStore } from "@/store/workoutStore"; 
 import RestTimer from "./RestTimer";
 

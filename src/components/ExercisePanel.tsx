@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Pressable, TextInput, FlatList, ActivityIndicator } from "react-native";
-import AnimatedModal from "./AnimatedModal";
+import AnimatedModal from "./ui/AnimatedModal";
 import { Feather } from '@expo/vector-icons';
 import ExerciseInfoModal from "./ExerciseInfoModal";
 import { WgerExercise } from "@/types";
