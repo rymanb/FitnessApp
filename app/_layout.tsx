@@ -4,8 +4,19 @@ import { Slot, useRouter, useSegments, Stack, useRootNavigationState } from 'exp
 import { AuthProvider, useAuth } from '@/context/AppContext';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import * as Notifications from 'expo-notifications';
+import { initDB } from '@/db/database';
 
-console.log("LAYOUT FILE IS RUdNNING");
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true, 
+    shouldShowList: true,  
+  }),
+});
+
 function RootLayoutNav() {
     const {user, isLoading} = useAuth();
     const segments = useSegments();
@@ -16,6 +27,25 @@ function RootLayoutNav() {
 
     useEffect(() => {
         setIsMounted(true);
+
+        initDB();
+
+        async function setupNotifications() {
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+            
+            if (existingStatus !== 'granted') {
+                const { status } = await Notifications.requestPermissionsAsync();
+                finalStatus = status;
+            }
+            
+            if (finalStatus !== 'granted') {
+                alert('You need to enable notifications in your phone settings for the Rest Timer to work in the background!');
+                return;
+            }
+        }
+        
+        setupNotifications();
     }, []);
 
     useEffect(() => {
@@ -40,7 +70,7 @@ function RootLayoutNav() {
 
     return (
         <Stack screenOptions={{headerShown: false}}>
-            <Stack.Screen name="index" />
+            <Stack.Screen name="(tabs)" options={{headerShown: false}} />
             <Stack.Screen name="login" options={{animation: 'fade'}} />
         </Stack>
     );

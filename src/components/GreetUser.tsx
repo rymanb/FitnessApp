@@ -1,18 +1,12 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { useAuth } from '@/context/AppContext';
+import { Text } from '@/components/ui/Typography';
 
 const getTimeOfDayGreeting = (): string => {
     const currentHour = new Date().getHours();
-
-    if (currentHour >= 5 && currentHour <= 12) {
-        return "Good morning";
-    }
-    else if (currentHour >= 12 && currentHour <= 17) {
-        return "Good afternoon";
-    }
-    else {
-        return "Good evening";
-    }
+    if (currentHour >= 5 && currentHour <= 12) return "Good morning";
+    if (currentHour >= 12 && currentHour <= 17) return "Good afternoon";
+    return "Good evening";
 };
 
 export const GreetUser = () => {
@@ -23,20 +17,10 @@ export const GreetUser = () => {
     const maxNameLen = 12;
     const displayName = name.length > maxNameLen ? `${name.substring(0, maxNameLen)}...` : name;
 
-
     return (
-        <View className={styles.container} >
-            <Text className={styles.greetText}>{dynamicGreeting}!</Text>
-            <Text className={styles.userText}>{displayName}</Text>
+        <View className="flex-1 p-5">
+            <Text color="muted" className="font-mono text-xl">{dynamicGreeting}!</Text>
+            <Text variant="h2" className="font-mono mt-1">{displayName}</Text>
         </View>
     );
-}
-
-const genericText = `font-mono text-xl`
-
-const styles = {
-    container: `flex-1 p-5`,
-
-    greetText: `${genericText} text-zinc-300`,
-    userText: `${genericText} text-white font-bold`
 }

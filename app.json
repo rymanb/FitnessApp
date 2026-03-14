@@ -21,7 +21,8 @@
       "expo-router",
       "expo-web-browser",
       "@react-native-google-signin/google-signin",
-      "expo-video"
+      "expo-video",
+      "expo-sqlite"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",

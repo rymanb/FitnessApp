@@ -3,7 +3,6 @@ import { Modal, View, Animated, PanResponder, Dimensions } from 'react-native';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-
 interface AnimatedModalProps {
   isVisible: boolean;
   onClose: () => void;
@@ -12,13 +11,17 @@ interface AnimatedModalProps {
   heightClass?: string
 }
 
-export default function AnimatedModal({isVisible, onClose, children, className="bg-zinc-900 rounded-t-3xl p-6", heightClass="h-[90%]"} : AnimatedModalProps) {
+export default function AnimatedModal({
+    isVisible, 
+    onClose, 
+    children, 
+    className="bg-surface-dark rounded-t-3xl p-6", 
+    heightClass="h-[90%]"
+} : AnimatedModalProps) {
     const translateY = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        if (isVisible) {
-            translateY.setValue(0);
-        }
+        if (isVisible) translateY.setValue(0);
     }, [isVisible]);
 
     const panResponder = useRef(
@@ -47,27 +50,18 @@ export default function AnimatedModal({isVisible, onClose, children, className="
   ).current;
 
     return (
-        <Modal
-            visible={isVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={onClose}
-        >
+        <Modal visible={isVisible} animationType="slide" transparent={true} onRequestClose={onClose}>
             <View className="flex-1 justify-end">
                 <Animated.View 
                     className={`${className} ${heightClass}`}
                     style={{ transform: [{ translateY: translateY }] }}
                 >
-            <View 
-                {...panResponder.panHandlers} 
-                className="w-full py-4 items-center"
-            >
-                <View className="w-12 h-1.5 bg-zinc-700 rounded-full" />
-            </View>
+                    <View {...panResponder.panHandlers} className="w-full py-4 items-center">
+                        <View className="w-12 h-1.5 bg-surface-light rounded-full" /> 
+                    </View>
                     {children}    
                 </Animated.View>
             </View>
-
         </Modal>
     );
 }

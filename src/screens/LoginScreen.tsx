@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, TouchableOpacity, Image } from 'react-native';
 import { useAuth } from '@/context/AppContext';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ export const Login = () => {
     const {login} = useAuth();
 
     return (
-    <SafeAreaView className="flex-1 bg-zinc-950 items-center justify-center p-8">
+    <SafeAreaView className="flex-1 bg-background items-center justify-center p-8">
       <StatusBar style="light" />
       <GoogleSigninButton
         size={GoogleSigninButton.Size.Wide}
@@ -16,7 +16,6 @@ export const Login = () => {
         onPress={login}
         disabled={false} 
       />
-
     </SafeAreaView>
     );
 }

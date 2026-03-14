@@ -1,41 +1,68 @@
-import {View, Text, ScrollView, Pressable} from 'react-native';
+import { View, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GreetUser } from '@/components/GreetUser';
 import { AccountButton } from '@/components/AccountButton';
 import { useState } from 'react';
 import PlanPanel from '@/components/PlanPanel';
+import { usePlanStore } from '@/store/planStore';
+import PlanCard from '@/components/PlanCard'; 
+
+// IMPORT THE PRIMITIVE!
+import { Text } from '@/components/ui/Typography';
 
 export const Dashboard = () => {
-    const [isCreatingPlan, setIsCreatingPlan] = useState(false);
+    const { savedPlans } = usePlanStore(); 
 
-  return (
-    <SafeAreaView className={styles.mainContainer}>
-        <View className={styles.userContainer}>
+    const [isPanelVisible, setIsPanelVisible] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<any | null>(null);
+
+    const handleCreateNewPlan = () => {
+        setSelectedPlan(null);
+        setIsPanelVisible(true);
+    }
+
+    const handleOpenExistingPlan = (plan: any) => {
+        setSelectedPlan(plan);
+        setIsPanelVisible(true);
+    }
+
+    return (
+        <SafeAreaView className="flex-1 bg-background p-4">
+            <View className="flex-row justify-between items-center mb-8 mt-4">
                 <AccountButton onPress={() => {}}/>
                 <GreetUser />
-        </View>
+            </View>
 
-        <View>
-            <Pressable onPress={() => setIsCreatingPlan(true)}>
-                <Text className={styles.headerText}>Create Plan</Text>
-            </Pressable>
+            <View className="flex-1 pb-4">
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    {savedPlans.length === 0 ? (
+                        <View className="items-center justify-center py-10">
+                            <Text color="muted" variant="h3">No plans saved yet.</Text>
+                            <Text color="dark" variant="caption" className="mt-2">Open the planner to create one!</Text>
+                        </View>
+                    ) : (
+                        savedPlans.map((plan) => (
+                            <PlanCard 
+                                key={plan.id} 
+                                plan={plan} 
+                                onEdit={() => handleOpenExistingPlan(plan)} 
+                            />
+                        ))
+                    )}
+                </ScrollView>
 
-            {isCreatingPlan && (
-                <PlanPanel
-                    isVisible={isCreatingPlan}
-                    onClose={() => setIsCreatingPlan(false)}
-                />
-            )}
+                <Pressable onPress={handleCreateNewPlan}> 
+                    <Text variant="h1" className="mb-6 mt-4">Create Plan</Text>
+                </Pressable>
 
-            
-        </View>
-
-    </SafeAreaView>
-  );
+                {isPanelVisible && (
+                    <PlanPanel
+                        isVisible={true} 
+                        onClose={() => setIsPanelVisible(false)}
+                        existingPlan={selectedPlan} 
+                    />
+                )}
+            </View>
+        </SafeAreaView>
+    );
 };
-
-const styles = {
-    mainContainer: `flex-1 bg-zinc-950 `,
-    headerText: `text-white p-5`,
-    userContainer: 'flex-row justify-between items-center px-5 pb-5 w-full'
-}
