@@ -25,12 +25,29 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="history"
+        name="stats"
         options={{
-          title: 'Hisotry',
+          title: 'Stats',
           tabBarIcon: ({ color }) => <Feather name="clock" size={24} color={color} />,
         }}
       />
+
+      <Tabs.Screen
+        name="coach"
+        options={{
+          title: 'Coach',
+          tabBarIcon: ({ color }) => <Feather name="message-square" size={24} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: 'History',
+          tabBarIcon: ({ color }) => <Feather name="bar-chart-2" size={24} color={color} />,
+        }}
+      />
+      
 
     </Tabs>
     <ActiveWorkoutModal />

@@ -39,12 +39,15 @@ export interface WorkoutPlan {
   name: string;
   exercises: PlannedExercise[];
   dateCreated: string;
+  updatedAt: string; 
+  isDeleted: boolean;
 }
 
 export interface CompletedWorkout {
-  id: string;            
-  planId: string;        
-  planName: string;      
-  dateCompleted: string; 
+  id: string;
+  planId: string;
+  planName: string;
+  dateCompleted: string;
+  durationSeconds: number;
   exercises: PlannedExercise[];
 }

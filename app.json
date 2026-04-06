@@ -6,6 +6,7 @@
     "version": "1.0.0",
     "android": {
       "package": "com.boney.fitness",
+      "softwareKeyboardLayoutMode ": "adjustResize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -20,9 +21,11 @@
     "plugins": [
       "expo-router",
       "expo-web-browser",
-      "@react-native-google-signin/google-signin",
+      [
+      ],
       "expo-video",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-secure-store"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -36,7 +39,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.boney.fitness",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "extra": {
       "router": {},

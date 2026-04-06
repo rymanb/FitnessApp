@@ -3,14 +3,16 @@ import { WorkoutPlan, PlannedExercise, WgerExercise } from '@/types';
 import { generateId } from '@/utils/helpers';
 import * as Notifications from 'expo-notifications';
 import { useHistoryStore } from './historyStore';
+import { useSettingsStore } from './settingsStore';
 
 interface WorkoutStore {
     activeWorkout: WorkoutPlan | null;
+    workoutStartTime: number | null;
     isExpanded: boolean;
     setIsExpanded: (val: boolean) => void;
     startWorkout: (plan: WorkoutPlan) => void;
     finishWorkout: () => void;
-    
+
     addActiveExercise: (exercise: WgerExercise) => void;
     removeActiveExercise: (exerciseId: string) => void;
     addActiveSet: (exerciseId: string) => void;
@@ -18,34 +20,39 @@ interface WorkoutStore {
     updateActiveSet: (exerciseId: string, setId: string, field: 'weight' | 'reps', value: string) => void;
     toggleActiveSetStatus: (exerciseId: string, setId: string) => Promise<void>;
 
-    restEndTime: number | null; 
-    timerNotificationId: string | null; 
+    restEndTime: number | null;
+    timerNotificationId: string | null;
     startRestTimer: (seconds: number) => Promise<void>;
     stopRestTimer: () => Promise<void>;
-
 }
 
 export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
     activeWorkout: null,
+    workoutStartTime: null,
     isExpanded: false,
     restEndTime: null,
     timerNotificationId: null,
 
     setIsExpanded: (val) => set({ isExpanded: val }),
-    
-    startWorkout: (plan) => set({ 
+
+    startWorkout: (plan) => set({
         activeWorkout: JSON.parse(JSON.stringify(plan)),
-        isExpanded: true 
+        workoutStartTime: Date.now(),
+        isExpanded: true
     }),
-    
+
     finishWorkout: async () => {
         const state = get();
 
         if (state.activeWorkout) {
+            const durationSeconds = state.workoutStartTime
+                ? Math.round((Date.now() - state.workoutStartTime) / 1000)
+                : 0;
             await useHistoryStore.getState().logWorkout(
                 state.activeWorkout.id,
                 state.activeWorkout.name,
-                state.activeWorkout.exercises
+                state.activeWorkout.exercises,
+                durationSeconds
             );
         }
 
@@ -53,7 +60,7 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
             await Notifications.cancelScheduledNotificationAsync(state.timerNotificationId);
         }
 
-        set({ activeWorkout: null, isExpanded: false, restEndTime: null, timerNotificationId: null});
+        set({ activeWorkout: null, workoutStartTime: null, isExpanded: false, restEndTime: null, timerNotificationId: null });
     },
 
     addActiveExercise: (exercise) => set((state) => {
@@ -68,11 +75,11 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
 
     removeActiveExercise: (exerciseId) => set((state) => {
         if (!state.activeWorkout) return state;
-        return { 
-            activeWorkout: { 
-                ...state.activeWorkout, 
-                exercises: state.activeWorkout.exercises.filter(ex => ex.uniqueId !== exerciseId) 
-            } 
+        return {
+            activeWorkout: {
+                ...state.activeWorkout,
+                exercises: state.activeWorkout.exercises.filter(ex => ex.uniqueId !== exerciseId)
+            }
         };
     }),
 
@@ -84,9 +91,9 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
                 exercises: state.activeWorkout.exercises.map(ex => {
                     if (ex.uniqueId === exerciseId) {
                         const lastSet = ex.sets[ex.sets.length - 1];
-                        return { 
-                            ...ex, 
-                            sets: [...ex.sets, { id: generateId(), weight: lastSet?.weight || '', reps: lastSet?.reps || '', completed: false }] 
+                        return {
+                            ...ex,
+                            sets: [...ex.sets, { id: generateId(), weight: lastSet?.weight || '', reps: lastSet?.reps || '', completed: false }]
                         };
                     }
                     return ex;
@@ -100,9 +107,9 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
         return {
             activeWorkout: {
                 ...state.activeWorkout,
-                exercises: state.activeWorkout.exercises.map(ex => 
-                    ex.uniqueId === exerciseId 
-                        ? { ...ex, sets: ex.sets.filter(s => s.id !== setId) } 
+                exercises: state.activeWorkout.exercises.map(ex =>
+                    ex.uniqueId === exerciseId
+                        ? { ...ex, sets: ex.sets.filter(s => s.id !== setId) }
                         : ex
                 )
             }
@@ -114,9 +121,9 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
         return {
             activeWorkout: {
                 ...state.activeWorkout,
-                exercises: state.activeWorkout.exercises.map(ex => 
-                    ex.uniqueId === exerciseId 
-                        ? { ...ex, sets: ex.sets.map(s => s.id === setId ? { ...s, [field]: value } : s) } 
+                exercises: state.activeWorkout.exercises.map(ex =>
+                    ex.uniqueId === exerciseId
+                        ? { ...ex, sets: ex.sets.map(s => s.id === setId ? { ...s, [field]: value } : s) }
                         : ex
                 )
             }
@@ -125,27 +132,27 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
 
     startRestTimer: async (seconds) => {
         const state = get();
-        
+
         if (state.timerNotificationId) {
             await Notifications.cancelScheduledNotificationAsync(state.timerNotificationId);
         }
 
         const id = await Notifications.scheduleNotificationAsync({
             content: {
-                title: 'Rest is over! 🔔',
-                body: "Time for your next set. Let's get it!",
+                title: 'Rest is over!',
+                body: "Time for your next set.",
                 sound: true,
             },
-            trigger: { 
-                type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, 
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
                 seconds: seconds,
-                repeats: false 
+                repeats: false
             },
         });
 
-        set({ 
-            restEndTime: Date.now() + seconds * 1000, 
-            timerNotificationId: id 
+        set({
+            restEndTime: Date.now() + seconds * 1000,
+            timerNotificationId: id
         });
     },
 
@@ -160,26 +167,33 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
     toggleActiveSetStatus: async (exerciseId, setId) => {
         const state = get();
         if (!state.activeWorkout) return;
-        
+
         let newlyCompleted = false;
 
-        const updatedExercises = state.activeWorkout.exercises.map(ex => 
-            ex.uniqueId === exerciseId 
+        const updatedExercises = state.activeWorkout.exercises.map(ex =>
+            ex.uniqueId === exerciseId
                 ? { ...ex, sets: ex.sets.map(s => {
                     if (s.id === setId) {
-                        newlyCompleted = !s.completed; 
+                        newlyCompleted = !s.completed;
                         return { ...s, completed: newlyCompleted };
                     }
                     return s;
-                }) } 
+                }) }
                 : ex
         );
 
         set({ activeWorkout: { ...state.activeWorkout, exercises: updatedExercises } });
 
         if (newlyCompleted) {
-            await get().startRestTimer(10);
+            const { restTimersEnabled, setRestSeconds, exerciseRestSeconds } = useSettingsStore.getState();
+            if (!restTimersEnabled) return;
+
+            // If all sets in this exercise are now complete, use the longer between-exercise rest
+            const completedExercise = updatedExercises.find(ex => ex.uniqueId === exerciseId);
+            const allSetsComplete = completedExercise?.sets.every(s => s.completed) ?? false;
+            const duration = allSetsComplete ? exerciseRestSeconds : setRestSeconds;
+
+            await get().startRestTimer(duration);
         }
     },
-
 }));

@@ -10,20 +10,38 @@ interface HistoryDetailModalProps {
     onClose: () => void;
 }
 
+const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+const formatDuration = (seconds: number) => {
+    if (!seconds || seconds <= 0) return null;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+};
+
 export default function HistoryDetailModal({ workout, onClose }: HistoryDetailModalProps) {
     if (!workout) return null;
 
-    const formatDate = (isoString: string) => {
-        const date = new Date(isoString);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    };
+    const duration = formatDuration(workout.durationSeconds);
 
     return (
         <AnimatedModal isVisible={!!workout} onClose={onClose} heightClass="h-[85%]">
-            <View className="flex-row justify-between items-center mt-2 px-2 mb-6">
+            <View className="flex-row justify-between items-start mt-2 px-2 mb-6">
                 <View>
                     <Text variant="h2">{workout.planName}</Text>
                     <Text color="primary" variant="caption" className="mt-1">{formatDate(workout.dateCompleted)}</Text>
+                    {duration && (
+                        <View className="flex-row items-center mt-1">
+                            <Feather name="clock" size={12} color="#a1a1aa" />
+                            <Text color="muted" variant="caption" className="ml-1">{duration}</Text>
+                        </View>
+                    )}
                 </View>
                 <Pressable onPress={onClose} className="p-2 bg-surface rounded-full active:bg-surface-light">
                     <Feather name="x" size={24} color="#a1a1aa" />

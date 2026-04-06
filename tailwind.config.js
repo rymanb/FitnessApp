@@ -6,22 +6,30 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#2563eb', 
-          light: '#60a5fa',   
-          dark: '#1d4ed8',    
+          DEFAULT: '#2563eb',
+          light: '#60a5fa',
+          dark: '#1d4ed8',
         },
-        background: '#000000',   
+        background: 'var(--background)',
         surface: {
-          DEFAULT: '#27272a',    
-          light: '#3f3f46',     
-          dark: '#18181b',
+          DEFAULT: 'var(--surface)',
+          light: 'var(--surface-light)',
+          dark: 'var(--surface-dark)',
         },
         text: {
-          DEFAULT: '#ffffff',  
-          muted: '#a1a1aa',  
-          dark: '#52525b'
-        }
-      }
+          DEFAULT: 'var(--text)',
+          muted: 'var(--text-muted)',
+          dark: 'var(--text-dark)',
+        },
+        card: {
+          DEFAULT: 'var(--card)',
+          light: 'var(--card-light)',
+          dark: 'var(--card-dark)',
+        },
+        modal: {
+          DEFAULT: 'var(--modal)',
+        },
+      },
     },
   },
   plugins: [],

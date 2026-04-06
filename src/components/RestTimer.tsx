@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { useWorkoutStore } from '@/store/workoutStore';
 import { Feather } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics'; 
+import * as Haptics from 'expo-haptics';
 import { Text } from '@/components/ui/Typography';
 
 export default function RestTimer() {
@@ -27,9 +27,9 @@ export default function RestTimer() {
             }
         };
 
-        updateTimer(); 
+        updateTimer();
         const interval = setInterval(updateTimer, 1000);
-        
+
         return () => clearInterval(interval);
     }, [restEndTime, stopRestTimer]);
 
@@ -40,29 +40,30 @@ export default function RestTimer() {
     const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
     return (
+        // pointerEvents="box-none" lets touches pass through the container to the workout content below,
+        // while pointerEvents="auto" on the inner view keeps the buttons interactive.
         <View pointerEvents="box-none" className="absolute bottom-10 left-0 right-0 items-center z-50">
-            {/* FIXED: Explicitly use pointerEvents="auto" here so the buttons are still clickable */}
             <View pointerEvents="auto" className="bg-primary rounded-full flex-row items-center px-5 py-3 shadow-xl border border-primary-light">
                 <Feather name="clock" size={18} color="white" />
                 <Text variant="h3" className="mx-3 font-mono">
                     {formattedTime}
                 </Text>
-                
-                <Pressable 
+
+                <Pressable
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         startRestTimer(timeLeft + 30);
-                    }} 
+                    }}
                     className="px-3 py-1 border-l border-white/20 active:opacity-50"
                 >
                     <Text className="font-bold">+30s</Text>
                 </Pressable>
-                
-                <Pressable 
+
+                <Pressable
                     onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         stopRestTimer();
-                    }} 
+                    }}
                     className="px-3 py-1 border-l border-white/20 active:opacity-50"
                 >
                     <Text className="font-bold">Skip</Text>

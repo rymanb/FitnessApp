@@ -12,10 +12,10 @@ interface AnimatedModalProps {
 }
 
 export default function AnimatedModal({
-    isVisible, 
-    onClose, 
-    children, 
-    className="bg-surface-dark rounded-t-3xl p-6", 
+    isVisible,
+    onClose,
+    children,
+    className="bg-modal rounded-t-3xl p-6",
     heightClass="h-[90%]"
 } : AnimatedModalProps) {
     const translateY = useRef(new Animated.Value(0)).current;
@@ -52,7 +52,7 @@ export default function AnimatedModal({
     return (
         <Modal visible={isVisible} animationType="slide" transparent={true} onRequestClose={onClose}>
             <View className="flex-1 justify-end">
-                <Animated.View 
+                <Animated.View
                     className={`${className} ${heightClass}`}
                     style={{ transform: [{ translateY: translateY }] }}
                 >
