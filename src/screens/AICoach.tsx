@@ -1,14 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { 
-    View, 
-    TextInput, 
-    FlatList, 
-    Pressable, 
-    ActivityIndicator, 
-    Platform, 
+import {
+    View,
+    TextInput,
+    FlatList,
+    Pressable,
+    ActivityIndicator,
     Alert,
     Dimensions,
-    StyleSheet // 🚨 Added for Markdown styling
+    StyleSheet
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,9 +22,8 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { PlannedExercise } from '@/types';
 import ExerciseDB from '@/data/exercises.json';
-
-// 🚨 Added Markdown Library
 import Markdown from 'react-native-markdown-display';
+import SharedPlanPanel, { SharedPlanData } from '@/components/SharedPlanPanel';
 
 interface ChatMessage {
     id: string;
@@ -45,7 +43,8 @@ export const AICoach = () => {
     }]);
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [isImporting, setIsImporting] = useState<string | null>(null);
+    const [isImporting, setIsImporting] = useState(false);
+    const [previewPlan, setPreviewPlan] = useState<SharedPlanData | null>(null);
     const [tokensUsed, setTokensUsed] = useState<number | null>(null);
     const [dailyLimit, setDailyLimit] = useState(20000);
     const flatListRef = useRef<FlatList>(null);
@@ -127,41 +126,52 @@ export const AICoach = () => {
         }
     };
 
-    const handleImportPlan = async (planData: any, messageId: string) => {
-        setIsImporting(messageId);
-        try {
-            const mappedExercises: PlannedExercise[] = [];
-            for (const aiEx of planData.exercises) {
-                const queryName = aiEx.wger_search_query || aiEx.name;
-                const bestMatch = (ExerciseDB as any[]).find((dbEx: any) => 
-                    dbEx.displayName?.toLowerCase() === queryName?.toLowerCase() ||
-                    dbEx.name?.toLowerCase() === queryName?.toLowerCase()
-                );
-
-                const sets = Array.from({ length: aiEx.sets || 3 }).map(() => ({
-                    id: generateId(), weight: '', reps: aiEx.target_reps || "10", completed: false
-                }));
-
-                if (bestMatch) {
-                    mappedExercises.push({
-                        uniqueId: generateId(),
-                        wgerData: { ...bestMatch, displayName: bestMatch.displayName || bestMatch.name },
-                        sets
-                    } as PlannedExercise);
-                } else {
-                    mappedExercises.push({
-                        uniqueId: generateId(),
-                        wgerData: { id: Math.floor(Math.random() * -10000), name: queryName, displayName: queryName, category: { id: 1, name: "AI Generated" } },
-                        sets
-                    } as PlannedExercise);
-                }
+    const buildMappedExercises = (planData: any): PlannedExercise[] => {
+        return planData.exercises.map((aiEx: any) => {
+            const queryName = aiEx.wger_search_query || aiEx.name;
+            const bestMatch = (ExerciseDB as any[]).find((dbEx: any) =>
+                dbEx.displayName?.toLowerCase() === queryName?.toLowerCase() ||
+                dbEx.name?.toLowerCase() === queryName?.toLowerCase()
+            );
+            const sets = Array.from({ length: aiEx.sets || 3 }).map(() => ({
+                id: generateId(), weight: '', reps: String(aiEx.target_reps ?? 10), completed: false
+            }));
+            if (bestMatch) {
+                return {
+                    uniqueId: generateId(),
+                    wgerData: { ...bestMatch, displayName: bestMatch.displayName || bestMatch.name },
+                    sets,
+                } as PlannedExercise;
             }
-            savePlan(planData.name || "AI Workout Plan", mappedExercises);
-            setMessages(prev => [...prev, { id: generateId(), role: 'ai', type: 'chat', text: `Boom! I just saved "${planData.name}" to your Dashboard.` }]);
-        } catch (e) {
+            return {
+                uniqueId: generateId(),
+                wgerData: { id: Math.floor(Math.random() * -10000), name: queryName, displayName: queryName, category: { id: 1, name: "AI Generated" } },
+                sets,
+            } as PlannedExercise;
+        });
+    };
+
+    const handleViewPlan = (planData: any) => {
+        const exercises = buildMappedExercises(planData);
+        setPreviewPlan({
+            planName: planData.name || "AI Workout Plan",
+            exercises,
+            creatorName: "AI Trainer",
+            creatorPhoto: "",
+        });
+    };
+
+    const handleImportPlan = () => {
+        if (!previewPlan) return;
+        setIsImporting(true);
+        try {
+            savePlan(previewPlan.planName, previewPlan.exercises);
+            setPreviewPlan(null);
+            setMessages(prev => [...prev, { id: generateId(), role: 'ai', type: 'chat', text: `Done! "${previewPlan.planName}" has been saved to your Dashboard.` }]);
+        } catch {
             Alert.alert("Error", "Could not import plan.");
         } finally {
-            setIsImporting(null);
+            setIsImporting(false);
         }
     };
 
@@ -212,7 +222,7 @@ export const AICoach = () => {
                 </View>
 
                 {item.type === 'plan' && item.planData && (
-                    <Card 
+                    <Card
                         className="mt-2 p-4 border border-indigo-500/30 bg-indigo-500/5"
                         style={{ width: Dimensions.get('window').width * 0.72 }}
                     >
@@ -220,18 +230,13 @@ export const AICoach = () => {
                             <Feather name="zap" size={18} color="#6366f1" />
                             <Text variant="h3" className="ml-2 flex-1" numberOfLines={1}>{item.planData.name}</Text>
                         </View>
-                        
-                        <View className="mb-4">
-                            {item.planData.exercises?.slice(0, 3).map((ex: any, i: number) => (
-                                <Text key={i} color="muted" variant="caption" className="mb-1" numberOfLines={1}>
-                                    • {ex.sets}x {ex.wger_search_query || ex.name}
-                                </Text>
-                            ))}
-                        </View>
-                        
-                        <Button 
-                            title={isImporting === item.id ? "Importing..." : "Import Plan"} 
-                            onPress={() => handleImportPlan(item.planData, item.id)} 
+                        <Text color="muted" variant="caption" className="mb-4">
+                            {item.planData.exercises?.length} exercises
+                        </Text>
+                        <Button
+                            title="View Plan"
+                            variant="secondary"
+                            onPress={() => handleViewPlan(item.planData)}
                         />
                     </Card>
                 )}
@@ -296,6 +301,16 @@ export const AICoach = () => {
                     </Pressable>
                 </View>
             </KeyboardAvoidingView>
+
+            {previewPlan && (
+                <SharedPlanPanel
+                    isVisible={true}
+                    plan={previewPlan}
+                    onClose={() => setPreviewPlan(null)}
+                    onImport={handleImportPlan}
+                    isImporting={isImporting}
+                />
+            )}
         </View>
     );
 };

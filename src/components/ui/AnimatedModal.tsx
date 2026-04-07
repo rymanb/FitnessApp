@@ -57,9 +57,9 @@ export default function AnimatedModal({
                     style={{ transform: [{ translateY: translateY }] }}
                 >
                     <View {...panResponder.panHandlers} className="w-full py-4 items-center">
-                        <View className="w-12 h-1.5 bg-surface-light rounded-full" /> 
+                        <View className="w-12 h-1.5 bg-surface-light rounded-full" />
                     </View>
-                    {children}    
+                    {children}
                 </Animated.View>
             </View>
         </Modal>

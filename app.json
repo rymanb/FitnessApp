@@ -21,8 +21,6 @@
     "plugins": [
       "expo-router",
       "expo-web-browser",
-      [
-      ],
       "expo-video",
       "expo-sqlite",
       "expo-secure-store"

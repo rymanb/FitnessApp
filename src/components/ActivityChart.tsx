@@ -8,6 +8,9 @@ import { Card } from './ui/Card';
 import { useRouter } from 'expo-router';
 import { useThemeColors } from '@/context/ThemeContext';
 
+const toLocalDateStr = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
 export default function ActivityChart() {
     const { workoutHistory } = useHistoryStore();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -25,7 +28,7 @@ export default function ActivityChart() {
 
     const markedDates = useMemo(() => {
         const marks: Record<string, any> = {};
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = toLocalDateStr(new Date());
 
         const workoutStyle = {
             container: {
@@ -50,7 +53,7 @@ export default function ActivityChart() {
         };
 
         workoutHistory.forEach(workout => {
-            const dateStr = workout.dateCompleted.split('T')[0];
+            const dateStr = toLocalDateStr(new Date(workout.dateCompleted));
             marks[dateStr] = { customStyles: workoutStyle };
         });
 
@@ -94,7 +97,7 @@ export default function ActivityChart() {
         }
     }), [colors]);
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = toLocalDateStr(new Date());
 
     return (
         <Card className="mb-6 mx-1">

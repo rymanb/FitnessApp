@@ -69,7 +69,7 @@ export function useThemeColors() {
 
 export function ThemeProvider({ children, colorScheme }: { children: React.ReactNode; colorScheme: ColorScheme }) {
     return (
-        <ThemeColorsContext.Provider value={THEME_COLORS[colorScheme]}>
+        <ThemeColorsContext.Provider value={THEME_COLORS[colorScheme] ?? THEME_COLORS.dark}>
             <View style={[{ flex: 1 }, colorScheme === 'light' ? lightVars : darkVars]}>
                 {children}
             </View>
